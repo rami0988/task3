@@ -32,7 +32,7 @@ export default function Login() {
       if (data.success) {
         showSuccess(data.message);
         localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+        navigate("/Home");
       } else {
         showError(data.message);
       }

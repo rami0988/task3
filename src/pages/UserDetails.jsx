@@ -1,32 +1,4 @@
-// // src/pages/UserDetails.jsx
-// import React from 'react';
-// import { useParams } from 'react-router-dom';
-// import { useSelector } from 'react-redux';
 
-// const UserDetails = () => {
-//   const { id } = useParams();
-//   const user = useSelector((state) =>
-//     state.users.data.find((u) => u.id.toString() === id)
-//   );
-
-//   if (!user) {
-//     return <div className="text-center text-gray-600 mt-8">المستخدم غير موجود</div>;
-//   }
-
-//   return (
-//     <div className="max-w-xl mx-auto mt-10 bg-white shadow p-6 rounded-lg">
-//       <h1 className="text-2xl font-bold text-gray-800 mb-4">تفاصيل المستخدم</h1>
-//       <p><strong>الاسم الكامل:</strong> {user.name}</p>
-//       <p><strong>الإيميل:</strong> {user.email}</p>
-//       <p><strong>المدينة:</strong> {user.address.city}</p>
-//       <p><strong>رقم الهاتف:</strong> {user.phone}</p>
-//       <p><strong>الاسم المستخدم:</strong> {user.username}</p>
-//       <p><strong>الموقع:</strong> {user.website}</p>
-//     </div>
-//   );
-// };
-
-// export default UserDetails;
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';

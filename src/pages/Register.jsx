@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import InputField from "../components/InputField";
-import { showSuccess, showError } from "../components/AlertToast";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, clearMessages } from "../redux/authSlice";
 import { useNavigate } from "react-router-dom";
+import { showSuccess, showError } from "../components/AlertToast";
+
 export default function Register() {
   const [form, setForm] = useState({
     name: "",
@@ -9,43 +13,51 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // حالة لإظهار كلمة المرور
+  const [showPassword, setShowPassword] = useState(false);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { loading, error, successMessage } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (successMessage) {
+      showSuccess(successMessage);
+      dispatch(clearMessages());
+      navigate("/login");
+    }
+  }, [successMessage, dispatch, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      showError(error);
+      dispatch(clearMessages());
+    }
+  }, [error, dispatch]);
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
   };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (form.password !== form.confirmPassword)
-      return showError("The passwords do not match");
 
-    try {
-      const res = await fetch(
-        "https://a676ec18-1fee-4e5f-903e-1858f964ef22.mock.pstmn.io/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        showSuccess(data.message);
-        navigate("/login");
-      } else showError(data.message);
-    } catch {
-      showError(" erorr on creating acount  ");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      showError("The passwords do not match");
+      return;
     }
+    dispatch(registerUser(form));
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#EEEBDD]/40 backdrop-blur-md py-10 px-4">
       <div className="w-full max-w-md p-6 rounded-xl shadow-md bg-white">
         <h2 className="text-2xl font-bold mb-6 text-[#1B1717] text-center">
-          Create new acount
+          Create new account
         </h2>
         <form onSubmit={handleSubmit}>
           <InputField

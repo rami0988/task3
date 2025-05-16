@@ -1,13 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../components/InputField";
-import { showSuccess, showError } from "../components/AlertToast";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearMessages } from "../redux/authSlice";
 import { useNavigate } from "react-router-dom";
+import { showSuccess, showError } from "../components/AlertToast";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // حالة لإظهار كلمة المرور
+  const [showPassword, setShowPassword] = useState(false);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { loading, error, successMessage, user } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (successMessage) {
+      showSuccess(successMessage);
+      dispatch(clearMessages());
+      navigate("/Home");
+    }
+  }, [successMessage, dispatch, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      showError(error);
+      dispatch(clearMessages());
+    }
+  }, [error, dispatch]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,31 +38,9 @@ export default function Login() {
     setShowPassword((prev) => !prev);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await fetch(
-        "https://a676ec18-1fee-4e5f-903e-1858f964ef22.mock.pstmn.io/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        showSuccess(data.message);
-        localStorage.setItem("token", data.token);
-        navigate("/Home");
-      } else {
-        showError(data.message);
-      }
-    } catch {
-      showError("error on login");
-    } finally {
-      setLoading(false);
-    }
+    dispatch(loginUser(form));
   };
 
   return (

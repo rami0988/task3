@@ -1,43 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import InputField from "../components/InputField";
 import { showSuccess, showError } from "../components/AlertToast";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setEmail,
+  clearMessages,
+  sendResetEmail,
+} from "../redux/forgetPasswordSlice";
 
 export default function ForgetPassword() {
-  const [form, setForm] = useState({ email: "" });
-  const [loading, setLoading] = useState(false);
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const { email, loading, error, successMessage } = useSelector(
+    (state) => state.forgetPassword
+  );
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await fetch(
-        "https://a676ec18-1fee-4e5f-903e-1858f964ef22.mock.pstmn.io/forgotPassword",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        showSuccess(data.message);
-        navigate("/login");
-      } else {
-        showError(data.message);
-      }
-    } catch (error) {
-      showError("Error on reset: " + error.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (error) {
+      showError(error);
+      dispatch(clearMessages());
     }
+  }, [error, dispatch]);
+
+  useEffect(() => {
+    if (successMessage) {
+      showSuccess(successMessage);
+      dispatch(clearMessages());
+      navigate("/login");
+    }
+  }, [successMessage, dispatch, navigate]);
+
+  const handleChange = (e) => {
+    dispatch(setEmail(e.target.value));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(sendResetEmail(email));
   };
 
   return (
@@ -50,7 +51,7 @@ export default function ForgetPassword() {
           <InputField
             label="Email"
             name="email"
-            value={form.email}
+            value={email}
             onChange={handleChange}
             type="email"
           />
